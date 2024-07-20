@@ -1,3 +1,3 @@
 parktowerlease.pdf
-__pycache__/
-bob/
+__pycache__/*
+bob/*
