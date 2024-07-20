@@ -52,5 +52,58 @@ for i in range(len(section_headers) - 1):
 taa_map_section_to_text[section_headers[len(section_headers)-1]] = extract_from_last_header(taa_data, section_headers[len(section_headers)-1])
 my_map_section_to_text[section_headers[len(section_headers)-1]] = extract_from_last_header(my_data, section_headers[len(section_headers)-1])
 
+# LLM interactions:
+import base64
+import vertexai
+from vertexai.generative_models import GenerativeModel, Part, FinishReason
+import vertexai.preview.generative_models as generative_models
 
-# prompt engineer:
+def generate():
+    vertexai.init(project="aitxhack24aus-632", location="us-central1")
+    model = GenerativeModel(
+    "gemini-1.5-pro-001",
+    )
+    responses_arr = []
+    for header in section_headers:
+        if header == "LEASE DETAILS":
+            continue
+        print("section "+header)
+        prompt = f"""You\'re a helpful AI Assistant, giving me some feedback on a lease. I\'m going to give you the Texas Apartment Association (TAA) base lease and my lease. I am giving you the section on {header}. 
+        Do two things:
+        (1) show me what are the differences between them
+        (2) explain to me if these differences matter
+
+        TAA Lease:
+        ```
+        {taa_map_section_to_text[header]}
+        ```
+
+        My Lease:
+        ```
+        {my_map_section_to_text[header]}
+        ```"""
+        responses = model.generate_content(
+            [prompt],
+            generation_config=generation_config,
+            safety_settings=safety_settings,
+            stream=True,
+        )
+        for response in responses:
+            responses_arr.append(response.text)
+            print(response.text, end="")
+        print(":::going to new section:::")
+
+generation_config = {
+    "max_output_tokens": 8192,
+    "temperature": 1,
+    "top_p": 0.95,
+}
+
+safety_settings = {
+    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+}
+
+generate()
