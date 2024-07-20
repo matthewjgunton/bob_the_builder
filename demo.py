@@ -31,6 +31,8 @@ def process_pdf(file):
 def append_yields(file):
     output_text = ""
     for chunk in process_pdf(file):
+        if hasattr(chunk, '__iter__') and not isinstance(chunk, str):
+            chunk = ''.join(str(item) for item in chunk)
         output_text += chunk
         yield output_text
 
@@ -45,3 +47,6 @@ with gr.Blocks() as demo:
     analyze_button.click(append_yields, inputs=pdf_input, outputs=output_text)
 
 demo.launch()
+
+# should you live here >> scale of 1 to 10
+# 3 key questions

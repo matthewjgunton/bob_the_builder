@@ -5,6 +5,7 @@ import base64
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part, FinishReason
 import vertexai.preview.generative_models as generative_models
+from time import sleep
 
 class Bob:
 
@@ -49,7 +50,7 @@ class Bob:
             if header == "LEASE DETAILS":
                 continue
             print("section "+header)
-            prompt = f"""You\'re a helpful AI Assistant, giving me some feedback on a lease. I\'m going to give you the Texas Apartment Association (TAA) base lease and my lease. I am giving you the section on {header}. 
+            prompt = f"""You're a helpful AI Assistant, giving me some feedback on a lease. I'm going to give you the Texas Apartment Association (TAA) base lease and my lease. I am giving you the section on {header}. 
             Do two things:
             (1) show me what are the differences between them
             (2) explain to me if these differences matter
@@ -63,7 +64,8 @@ class Bob:
             ```
             {self.my_map_section_to_text[header]}
             ```"""
-            return self.llm_call(prompt)
+            yield from self.llm_call(prompt)
+
 
     def llm_call(self, prompt):
         generation_config = {
@@ -82,12 +84,20 @@ class Bob:
         model = GenerativeModel(
         "gemini-1.5-pro-001",
         )
-        responses = model.generate_content(
-                [prompt],
-                generation_config=generation_config,
-                safety_settings=safety_settings,
-                stream=True,
-        )
+        tries = 0
+        while tries < 3:
+            try:
+                responses = model.generate_content(
+                        [prompt],
+                        generation_config=generation_config,
+                        safety_settings=safety_settings,
+                        stream=True,
+                )
+                break
+            except e:
+                sleep(2 ** tries)
+                tries += 1
+
         for response in responses:
             yield response.text
 
@@ -109,3 +119,5 @@ class Bob:
         yield from self.generate()
 
 # ui
+# real-estate contract diffs 
+# the story is starting narrow & then expand into further contracts

@@ -1,4 +1,0 @@
-[ 
-    { user, message}  <- "user says something like"
-    { assistant, message} <- "assistant says something like"
-]
