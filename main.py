@@ -51,9 +51,10 @@ class Bob:
                 continue
             print("section "+header)
             prompt = f"""You're a helpful AI Assistant, giving me some feedback on a lease. I'm going to give you the Texas Apartment Association (TAA) base lease and my lease. I am giving you the section on {header}. 
-            Do two things:
-            (1) show me what are the differences between them
-            (2) explain to me if these differences matter
+            Do three things:
+            (1) name the section you're analyzing
+            (2) show me what are the differences between them. Be specific.
+            (3) explain to me if these differences matter
 
             TAA Lease:
             ```
